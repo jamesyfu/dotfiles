@@ -26,3 +26,4 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 
 # ssh hosts
 alias csil="ssh fu77@csil.cs.ucsb.edu"
+

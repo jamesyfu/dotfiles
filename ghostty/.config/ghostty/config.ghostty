@@ -28,3 +28,6 @@ palette = 14=#35a77c
 palette = 15=#fffbef
 font-size = 15
 mouse-hide-while-typing = true
+window-width = 100
+window-height = 30
+shell-integration = none

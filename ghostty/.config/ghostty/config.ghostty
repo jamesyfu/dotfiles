@@ -26,6 +26,7 @@ palette = 12=#3a94c5
 palette = 13=#df69ba
 palette = 14=#35a77c
 palette = 15=#fffbef
+font-family = "JetBrainsMono Nerd Font"
 font-size = 15
 mouse-hide-while-typing = true
 window-width = 100

@@ -17,3 +17,6 @@ done
 # attach ble.sh
 [[ ${BLE_VERSION-} ]] && ble-attach
 
+
+# uv
+export PATH="/home/james/.local/bin:$PATH"

@@ -1,7 +1,14 @@
 # for enabling vi editing mode
 set -o vi
 
-source /usr/share/git/completion/git-prompt.sh
+# Git Prompt Configuration
+if [[ "$OSTYPE" == "linux-gnu"* ]] && [[ -f /usr/share/git/completion/git-prompt.sh ]]; then
+    # Arch Linux path
+    source /usr/share/git/completion/git-prompt.sh
+elif [[ "$OSTYPE" == "darwin"* ]] && [[ -f /opt/homebrew/opt/git/etc/bash_completion.d/git-prompt.sh ]]; then
+    # macOS Homebrew path
+    source /opt/homebrew/opt/git/etc/bash_completion.d/git-prompt.sh
+fi
 
 # colored prompt using forest theme (using raw ANSI for ble.sh compatibility)
 red=$'\e[31m'

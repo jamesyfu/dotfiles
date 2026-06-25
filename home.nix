@@ -35,6 +35,18 @@
       "com.spotify.Client"
       "com.slack.Slack"
     ];
+    overrides = {
+      "org.signal.Signal" = {
+        # Force Signal to register the key inside KDE Plasma 6's secure wallet
+        Environment = {
+          "SIGNAL_PASSWORD_STORE" = "kwallet6";
+        };
+        # Grant the Flatpak absolute permission to talk to the KWallet system bus
+        Context = {
+          talks = [ "org.kde.kwalletd6" ];
+        };
+      };
+    };
   };
   
   # graphical login key loader for KWallet

@@ -137,6 +137,19 @@
     package = config.boot.kernelPackages.nvidiaPackages.latest;
   };
 
+  # bluetooth
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+    settings = {
+      General = {
+        # Enable high-quality audio routing and automatic controller discovery
+        Enable = "Source,Sink,Media,Socket";
+        Experimental = true; # Displays battery levels of connected headphones in KDE
+      };
+    };
+  };
+
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
   programs.steam = {

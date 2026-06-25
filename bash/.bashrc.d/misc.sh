@@ -1,7 +1,7 @@
-# for enabling vi editing mode
-set -o vi
-
-source /usr/share/git/completion/git-prompt.sh
+# Source the missing Git prompt definition on NixOS
+if [ -f /run/current-system/sw/share/git/contrib/completion/git-prompt.sh ]; then
+    . /run/current-system/sw/share/git/contrib/completion/git-prompt.sh
+fi
 
 # colored prompt using forest theme (using raw ANSI for ble.sh compatibility)
 red=$'\e[31m'

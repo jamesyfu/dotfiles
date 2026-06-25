@@ -1,0 +1,2 @@
+# Enable Vi command line editing (ble.sh will auto-detect this and upgrade it)
+set -o vi

@@ -36,6 +36,16 @@
       "com.slack.Slack"
     ];
   };
+  
+  # graphical login key loader for KWallet
+  xdg.configFile."autostart/ssh-add.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Declarative SSH Key Loader
+    Exec=${pkgs.openssh}/bin/ssh-add -q /home/james/.ssh/id_ed25519
+    Icon=dialog-scripts
+    X-KDE-AutostartScript=true
+  '';
 
   # symlinks
   xdg.configFile."ghostty".source = 

@@ -85,11 +85,16 @@
 
   # List services that you want to enable:
 
-  # Enable the systemd SSH agent daemon globally
-  programs.ssh.startAgent = true;
+  # SSH Agent with KDE Wallet Integration
+  programs.ssh = {
+    startAgent = true;
+    enableAskPassword = true; # Automatically hooks into the active DE's askpass
+  };
 
-  # Point the environment's askpass utility to KDE's Plasma 6 secure prompt
-  programs.ssh.askPassword = "${pkgs.kdePackages.ksshaskpass}/bin/ksshaskpass";
+  # Force OpenSSH to prefer the graphical prompt even inside a terminal
+  environment.variables = {
+    SSH_ASKPASS_REQUIRE = "prefer";
+  };
 
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;

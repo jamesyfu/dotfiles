@@ -34,6 +34,20 @@
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
+
+  # =========================================================================
+  # Internationalisation & Chinese Input Method (Fcitx5)
+  # =========================================================================
+  i18n.defaultLocale = "en_US.UTF-8";
+
+  i18n.inputMethod = {
+    enable = true;
+    type = "fcitx5";
+    fcitx5.addons = with pkgs; [
+      fcitx5-chinese-addons # Provides the standard Intelligent Pinyin engine
+      fcitx5-rime           # Provides the highly customizable Rime engine
+    ];
+  };
   # console = {
   #   font = "Lat2-Terminus16";
   #   keyMap = "us";
@@ -166,7 +180,30 @@
     tree
     ghostty
     fastfetch
+
+    # Core extraction utilities for Mason
+    unzip
+    gnutar
+    gzip
+
+    # Neovim fuzzy-finding essentials
+    ripgrep
+    fd
+
+    # Global Tree-sitter compilation tooling
+    tree-sitter
+    gcc
   ];
+
+  # for mason to work in neovim
+  programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [
+    stdenv.cc.cc
+    zlib
+    openssl
+    curl
+  ];
+
   programs.firefox.enable = true;
   programs.bash.blesh.enable = true;
 

@@ -34,6 +34,7 @@
       "md.obsidian.Obsidian"
       "com.spotify.Client"
       "com.slack.Slack"
+      "us.zoom.Zoom"
     ];
     overrides = {
       "org.signal.Signal" = {

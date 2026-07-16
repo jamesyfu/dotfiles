@@ -16,9 +16,18 @@
   # Enable Flatpak
   services.flatpak.enable = true;
 
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
+  # Secure Boot Configuration (Lanzaboote Engine)
+  # Force the standard systemd-boot implementation off so Lanzaboote can take over
+  boot.loader.systemd-boot.enable = lib.mkForce false;
   boot.loader.efi.canTouchEfiVariables = true;
+
+  boot.lanzaboote = {
+    enable = true;
+    pkiBundle = "/var/lib/sbctl";
+  };
+
+  # Disable USB Power Management to prevent bluetooth controller dropping
+  boot.kernelParams = [ "usbcore.autosuspend=-1" ];
 
   networking.hostName = "cosette"; # Define your hostname.
 
@@ -35,17 +44,11 @@
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
-  # =========================================================================
-  # Internationalisation & Chinese Input Method (Fcitx5)
-  # =========================================================================
-  i18n.defaultLocale = "en_US.UTF-8";
-
   i18n.inputMethod = {
     enable = true;
     type = "fcitx5";
     fcitx5.addons = with pkgs; [
-      fcitx5-chinese-addons # Provides the standard Intelligent Pinyin engine
-      fcitx5-rime           # Provides the highly customizable Rime engine
+      qt6Packages.fcitx5-chinese-addons # Provides the standard Intelligent Pinyin engine
     ];
   };
   # console = {
@@ -78,6 +81,36 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
+  };
+
+  # Disable Audio Node Suspend on Idle (Fixes silent resume lag / audio cutoffs)
+  services.pipewire.wireplumber.extraConfig."99-disable-suspend" = {
+    "monitor.alsa.rules" = [
+      {
+        matches = [
+          { "node.name" = "~alsa_input.*"; }
+          { "node.name" = "~alsa_output.*"; }
+        ];
+        actions = {
+          update-props = {
+            "session.suspend-timeout-seconds" = 0; # 0 disables suspend entirely
+          };
+        };
+      }
+    ];
+    "monitor.bluez.rules" = [
+      {
+        matches = [
+          { "node.name" = "~bluez_input.*"; }
+          { "node.name" = "~bluez_output.*"; }
+        ];
+        actions = {
+          update-props = {
+            "session.suspend-timeout-seconds" = 0; # 0 disables suspend entirely
+          };
+        };
+      }
+    ];
   };
 
   # Enable touchpad support (enabled default in most desktopManager).
@@ -193,6 +226,9 @@
     # Global Tree-sitter compilation tooling
     tree-sitter
     gcc
+
+    # Secure Boot Key Management
+    sbctl
   ];
 
   # for mason to work in neovim

@@ -70,9 +70,19 @@
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
   # services.xserver.xkb.options = "eurosign:e,caps:escape";
-
+  
   # Enable CUPS to print documents.
-  services.printing.enable = true;
+  services.printing = {
+    enable = true;
+    drivers = with pkgs; [ gutenprint ]; # Fallback drivers for Canon printers
+  };
+
+  # Enable Avahi for network printer auto-discovery (mDNS / AirPrint)
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    openFirewall = true; # Automatically opens mDNS ports in firewall
+  };
 
   # Enable sound with pipewire.
   security.rtkit.enable = true;

@@ -239,6 +239,14 @@
 
     # Secure Boot Key Management
     sbctl
+
+    # Video Playback
+    vlc
+    mpv
+    haruna
+
+    # Python
+    uv
   ];
 
   # for mason to work in neovim
@@ -248,6 +256,15 @@
     zlib
     openssl
     curl
+
+    # for Scientific Python wheels (NumPy, SciPy, Matplotlib, Jupyter)
+    glib
+    libGL
+    xorg.libX11
+    xorg.libXext
+    xorg.libXrender
+    xorg.libICE
+    xorg.libSM
   ];
 
   programs.firefox.enable = true;

@@ -1,3 +1,4 @@
+# flake.nix
 {
   description = "Unified system and environment configuration flake";
 
@@ -15,24 +16,44 @@
   };
 
   outputs = { self, nixpkgs, home-manager, nix-flatpak, lanzaboote, ... }@inputs: {
-    nixosConfigurations.cosette = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      modules = [
-        ./hardware-configuration.nix
-        ./configuration.nix
+    nixosConfigurations = {
+      
+      # Cosette
+      cosette = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./hosts/cosette/hardware-configuration.nix
+          ./hosts/cosette/configuration.nix
 
-        lanzaboote.nixosModules.lanzaboote
+          lanzaboote.nixosModules.lanzaboote
 
-        home-manager.nixosModules.home-manager
-        {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.extraSpecialArgs = { inherit inputs; };
-          
-          # This should strictly just import your home.nix file
-          home-manager.users.james = import ./home.nix;
-        }
-      ];
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = { inherit inputs; };
+            home-manager.users.james = import ./home.nix;
+          }
+        ];
+      };
+
+      # Jake
+      jake = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./hosts/jake/hardware-configuration.nix
+          ./hosts/jake/configuration.nix
+
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = { inherit inputs; };
+            home-manager.users.james = import ./home.nix;
+          }
+        ];
+      };
+
     };
   };
 }

@@ -1,0 +1,290 @@
+==> ./common.nix <==
+# common.nix
+{ config, lib, pkgs, ... }:
+
+{
+  # Core Nix settings
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nixpkgs.config.allowUnfree = true;
+
+  # Flatpak
+  services.flatpak.enable = true;
+
+  # Networking & Locale
+  networking.networkmanager.enable = true;
+  time.timeZone = "America/Los_Angeles";
+  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.inputMethod = {
+    enable = true;
+    type = "fcitx5";
+    fcitx5.addons = with pkgs; [
+      qt6Packages.fcitx5-chinese-addons
+    ];
+  };
+
+  # Graphical Desktop: KDE Plasma 6 on Wayland
+  services.xserver.enable = true;
+  services.displayManager.sddm = {
+    enable = true;
+    wayland.enable = true;
+  };
+  services.desktopManager.plasma6.enable = true;
+
+  # Printing & Network Discovery (Canon Pixma)
+  services.printing = {
+    enable = true;
+    drivers = with pkgs; [ gutenprint ];
+  };
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    openFirewall = true;
+  };
+
+  # PipeWire & WirePlumber (No suspend idle)
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+  };
+  services.pipewire.wireplumber.extraConfig."99-disable-suspend" = {
+    "monitor.alsa.rules" = [{
+      matches = [{ "node.name" = "~alsa_input.*"; } { "node.name" = "~alsa_output.*"; }];
+      actions.update-props."session.suspend-timeout-seconds" = 0;
+    }];
+    "monitor.bluez.rules" = [{
+      matches = [{ "node.name" = "~bluez_input.*"; } { "node.name" = "~bluez_output.*"; }];
+      actions.update-props."session.suspend-timeout-seconds" = 0;
+    }];
+  };
+
+  # Bluetooth
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+    settings.General = {
+      Enable = "Source,Sink,Media,Socket";
+      Experimental = true;
+    };
+  };
+
+  # Users
+  users.users.james = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" "networkmanager" ];
+  };
+
+  # SSH & KWallet
+  programs.ssh = {
+    startAgent = true;
+    enableAskPassword = true;
+  };
+  environment.variables.SSH_ASKPASS_REQUIRE = "prefer";
+
+  # List packages installed in system profile.
+  # You can use https://search.nixos.org/ to find more packages (and options).
+
+  # Steam
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall = true; 
+    dedicatedServer.openFirewall = true; 
+  };
+
+  # System Plumbing & Base Utilities
+  environment.systemPackages = with pkgs; [
+    vim
+    neovim
+    git
+    wget
+    tree
+
+    # Core extraction utilities for Mason
+    unzip
+    gnutar
+    gzip
+
+    # Neovim fuzzy-finding essentials
+    ripgrep
+    fd
+
+    # Global Tree-sitter compilation tooling
+    tree-sitter
+    gcc
+
+    # Video Playback
+    vlc
+    mpv
+    haruna
+
+    # Python
+    uv
+  ];
+
+  # for mason to work in neovim
+  programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [
+    stdenv.cc.cc
+    zlib
+    openssl
+    curl
+
+    # for Scientific Python wheels (NumPy, SciPy, Matplotlib, Jupyter)
+    glib
+    libGL
+    xorg.libX11
+    xorg.libXext
+    xorg.libXrender
+    xorg.libICE
+    xorg.libSM
+  ];
+
+  programs.firefox.enable = true;
+  programs.bash.blesh.enable = true;
+
+  # Btrfs auto-scrub
+  services.btrfs.autoScrub = {
+    enable = true;
+    interval = "monthly";
+  };
+}
+
+==> ./flake.nix <==
+# flake.nix
+{
+  description = "Unified system and environment configuration flake";
+
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    home-manager.url = "github:nix-community/home-manager/release-25.11";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
+
+    # Add Lanzaboote, anchored cleanly to the same release cycle
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v1.0.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
+  outputs = { self, nixpkgs, home-manager, nix-flatpak, lanzaboote, ... }@inputs: {
+    nixosConfigurations = {
+      
+      # Cosette
+      cosette = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./hosts/cosette/hardware-configuration.nix
+          ./hosts/cosette/configuration.nix
+
+          lanzaboote.nixosModules.lanzaboote
+
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = { inherit inputs; };
+            home-manager.users.james = import ./home.nix;
+          }
+        ];
+      };
+
+      # Jake
+      jake = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./hosts/jake/hardware-configuration.nix
+          ./hosts/jake/configuration.nix
+
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = { inherit inputs; };
+            home-manager.users.james = import ./home.nix;
+          }
+        ];
+      };
+
+    };
+  };
+}ix
+
+==> ./home.nix <==
+# home.nix
+{ config, pkgs, inputs, ... }:
+
+{
+  imports = [
+    # This is what teaches Home Manager what 'services.flatpak' means!
+    inputs.nix-flatpak.homeManagerModules.nix-flatpak
+  ];
+
+  home.username = "james";
+  home.homeDirectory = "/home/james";
+  home.stateVersion = "25.11";
+
+  programs.home-manager.enable = true;
+
+  # packages
+  home.packages = with pkgs; [
+    godot_4
+    kdePackages.okular
+    ghostty
+    fastfetch
+  ];
+
+  # flatpaks
+  services.flatpak = {
+    enable = true;
+    remotes = [
+      {
+        name = "flathub";
+        location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
+      }
+    ];
+    update.onActivation = true;
+    packages = [
+      "dev.vencord.Vesktop"
+      "org.signal.Signal"
+      "md.obsidian.Obsidian"
+      "com.spotify.Client"
+      "com.slack.Slack"
+      "us.zoom.Zoom"
+    ];
+    overrides = {
+      "org.signal.Signal" = {
+        # Force Signal to register the key inside KDE Plasma 6's secure wallet
+        Environment = {
+          "SIGNAL_PASSWORD_STORE" = "kwallet6";
+        };
+        # Grant the Flatpak absolute permission to talk to the KWallet system bus
+        Context = {
+          talks = [ "org.kde.kwalletd6" ];
+        };
+      };
+    };
+  };
+  
+  # graphical login key loader for KWallet
+  xdg.configFile."autostart/ssh-add.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Declarative SSH Key Loader
+    Exec=${pkgs.openssh}/bin/ssh-add -q /home/james/.ssh/id_ed25519
+    Icon=dialog-scripts
+    X-KDE-AutostartScript=true
+  '';
+
+  # symlinks
+  xdg.configFile."ghostty".source = 
+    config.lib.file.mkOutOfStoreSymlink /home/james/dotfiles/ghostty/.config/ghostty;
+  home.file.".bashrc".source = 
+    config.lib.file.mkOutOfStoreSymlink /home/james/dotfiles/bash/.bashrc;
+  home.file.".bashrc.d".source = 
+    config.lib.file.mkOutOfStoreSymlink /home/james/dotfiles/bash/.bashrc.d;
+  home.file.".blerc".source = 
+    config.lib.file.mkOutOfStoreSymlink /home/james/dotfiles/bash/.blerc;
+}

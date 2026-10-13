@@ -19,6 +19,8 @@
     kdePackages.okular
     ghostty
     fastfetch
+    vscode
+    elan
   ];
 
   # flatpaks

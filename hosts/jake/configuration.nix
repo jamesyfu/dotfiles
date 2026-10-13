@@ -9,9 +9,18 @@
 
   networking.hostName = "jake";
 
-  # Standard systemd-boot (independent from Windows drive)
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  # Disable systemd-boot (for duobooting)
+  boot.loader.systemd-boot.enable = false;
+
+  # Enable GRUB with EFI support and OS probing
+  boot.loader.grub = {
+    enable = true;
+    efiSupport = true;
+    device = "nodev"; # "nodev" is required for UEFI installs
+    useOSProber = true;
+    efiInstallAsRemovable = true; # Overwrites /EFI/BOOT/BOOTX64.EFI with GRUB
+  };
+  boot.loader.efi.canTouchEfiVariables = false;
 
   # Prevent Bluetooth controller dropping
   boot.kernelParams = [ "usbcore.autosuspend=-1" ];

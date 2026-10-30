@@ -21,6 +21,7 @@
     fastfetch
     vscode
     elan
+    opencode
   ];
 
   # flatpaks

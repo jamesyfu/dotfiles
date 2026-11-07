@@ -22,6 +22,7 @@
     vscode
     elan
     opencode
+    skanpage
   ];
 
   # flatpaks

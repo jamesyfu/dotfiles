@@ -40,6 +40,18 @@
     openFirewall = true;
   };
 
+  # Enable SANE daemon and driverless scanner backends
+  hardware.sane = {
+    enable = true;
+    extraBackends = [ pkgs.sane-airscan ];
+  };
+
+  # Enable driverless IPP scanning over USB (if connected via USB cable)
+  services.ipp-usb.enable = true;
+
+  # Ensure your user has permissions for scanner devices
+  users.users.james.extraGroups = [ "scanner" "lp" ];
+
   # PipeWire & WirePlumber (No suspend idle)
   security.rtkit.enable = true;
   services.pipewire = {
@@ -147,5 +159,25 @@
   services.btrfs.autoScrub = {
     enable = true;
     interval = "monthly";
+  };
+
+  # Dynamic in-RAM compressed swap
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";
+    memoryPercent = 50;
+  };
+
+  # Userspace OOM daemon
+  services.earlyoom = {
+    enable = true;
+    freeMemThreshold = 5;      # Kill before RAM drops below 5%
+    freeSwapThreshold = 10;    # Kill before zram drops below 10%
+    enableNotifications = true;
+    extraArgs = [
+      "-r" "60"
+      "--prefer" "^(lean|lake)$"
+      "--avoid" "^(kwin_wayland|Xwayland|systemd)$"
+    ];
   };
 }

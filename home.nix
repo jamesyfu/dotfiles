@@ -22,7 +22,7 @@
     vscode
     elan
     opencode
-    skanpage
+    kdePackages.skanpage
   ];
 
   # flatpaks

@@ -49,9 +49,6 @@
   # Enable driverless IPP scanning over USB (if connected via USB cable)
   services.ipp-usb.enable = true;
 
-  # Ensure your user has permissions for scanner devices
-  users.users.james.extraGroups = [ "scanner" "lp" ];
-
   # PipeWire & WirePlumber (No suspend idle)
   security.rtkit.enable = true;
   services.pipewire = {
@@ -84,7 +81,7 @@
   # Users
   users.users.james = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" ];
+    extraGroups = [ "wheel" "networkmanager" "scanner" "lp" ];
   };
 
   # SSH & KWallet

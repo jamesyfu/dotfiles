@@ -21,8 +21,8 @@
     fastfetch
     vscode
     elan
-    opencode
     kdePackages.skanpage
+    inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.opencode2
   ];
 
   # flatpaks
@@ -76,4 +76,8 @@
     config.lib.file.mkOutOfStoreSymlink /home/james/dotfiles/bash/.bashrc.d;
   home.file.".blerc".source = 
     config.lib.file.mkOutOfStoreSymlink /home/james/dotfiles/bash/.blerc;
+
+  programs.bash.shellAliases = {
+    opencode = "opencode2";
+  };
 }

@@ -13,6 +13,8 @@
       url = "github:nix-community/lanzaboote/v1.0.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    llm-agents.url = "github:numtide/llm-agents.nix";
   };
 
   outputs = { self, nixpkgs, home-manager, nix-flatpak, lanzaboote, ... }@inputs: {
@@ -53,7 +55,6 @@
           }
         ];
       };
-
     };
   };
 }
